@@ -13,25 +13,27 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @Controller
-//@RestController
-//@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
 
+    //Home Page View
     @GetMapping("/")
     public String homePage(Model model) {
         model.addAttribute("posts", postService.findAllOrderRank());
         return "index";
     }
 
+    //Detail Post View
     @GetMapping("/{id}")
     public String detailPost(@PathVariable("id") int id, Model model) {
+        //Add views everytime post viewed
         postService.incViews(id);
         model.addAttribute("post", postService.findByIdOrderRank(id));
         return "detail";
     }
 
+    //Create Form View
     @GetMapping("/form")
     public String createForm(Model model) {
         Post request = Post.builder().id(0).build();
@@ -39,6 +41,7 @@ public class PostController {
         return "form";
     }
 
+    //Create/Update API
     @PostMapping("/save")
     public String createPost(@ModelAttribute("form") Post post, Model model) {
         try {
@@ -69,6 +72,7 @@ public class PostController {
         }
     }
 
+    //Update Form View
     @GetMapping("/form/{id}")
     public String updateForm(@PathVariable("id") int id, Model model) {
         Post post = postService.find(id);
@@ -76,6 +80,7 @@ public class PostController {
         return "form";
     }
 
+    //Delete Form View
     @GetMapping("/delete/{id}")
     public String deleteForm(@PathVariable("id") int id, Model model) {
         Post post = postService.find(id);
@@ -83,6 +88,7 @@ public class PostController {
         return "delete";
     }
 
+    //Delete API
     @PostMapping("/delete")
     public String deletePost(@ModelAttribute("delete") Post post, Model model) {
         try {
@@ -99,56 +105,4 @@ public class PostController {
         }
 
     }
-
-//    @GetMapping
-//    public ResponseEntity<CommonResponse<List<PostResponse>>> findAll() {
-//        List<PostResponse> posts = postService.findAll();
-//        CommonResponse<List<PostResponse>> responses = CommonResponse.<List<PostResponse>>builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .message("success fetch data")
-//                .data(posts)
-//                .build();
-//        return ResponseEntity.ok(responses);
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<CommonResponse<PostResponse>> findById(@PathVariable int id) {
-//        PostResponse post = postService.findById(id);
-//        CommonResponse<PostResponse> response = CommonResponse.<PostResponse>builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .message("success fetch data")
-//                .data(post)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @PostMapping
-//    public ResponseEntity<CommonResponse<?>> create(@RequestBody CreatePostRequest request) {
-//        postService.create(request);
-//        CommonResponse<?> response = CommonResponse.builder()
-//                .statusCode(HttpStatus.CREATED.value())
-//                .message("success create data")
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @PutMapping
-//    public ResponseEntity<CommonResponse<?>> update(@RequestBody UpdatePostRequest request) {
-//        postService.update(request);
-//        CommonResponse<?> response = CommonResponse.builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .message("success update data")
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<CommonResponse<?>> delete(@PathVariable int id) {
-//        postService.delete(id);
-//        CommonResponse<?> response = CommonResponse.builder()
-//                .statusCode(HttpStatus.OK.value())
-//                .message("success delete data")
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
 }

@@ -58,6 +58,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void create(CreatePostRequest request) {
+        // Name Rules
         if (hangulMatcher(request.getAuthor())) {
             if (request.getAuthor().length() > 10) {
                 throw new ConstraintViolationException("name only contain up to 10 characters in Korean", null);
@@ -67,10 +68,11 @@ public class PostServiceImpl implements PostService {
                 throw new ConstraintViolationException("name only contain up to 50 characters in English", null);
             }
         }
-        if (isNameValid(request.getAuthor())) {
+        if (isNameInvalid(request.getAuthor())) {
             throw new ConstraintViolationException("name should not contain special characters or numbers", null);
         }
 
+        //Title Rules
         if (hangulMatcher(request.getTitle())) {
             if (request.getTitle().length() > 50) {
                 throw new ConstraintViolationException("titles only contain up to 50 characters in Korean", null);
@@ -81,11 +83,15 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        //Password Rules
         if (request.getPassword().length() < 6) {
             throw new ConstraintViolationException("password at least 6 characters", null);
         }
         if (request.getPassword().length() > 64) {
             throw new ConstraintViolationException("password only contain up to 100 characters", null);
+        }
+        if (!isPasswordValid(request.getPassword())) {
+            throw new ConstraintViolationException("password should only contain latin letters, numbers, and special characters", null);
         }
 
         Post post = Post.builder()
@@ -104,6 +110,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void update(UpdatePostRequest request) {
+        //Name Rules
         if (hangulMatcher(request.getAuthor())) {
             if (request.getAuthor().length() > 10) {
                 throw new ConstraintViolationException("name only contain up to 10 characters in Korean", null);
@@ -113,10 +120,11 @@ public class PostServiceImpl implements PostService {
                 throw new ConstraintViolationException("name only contain up to 50 characters in English", null);
             }
         }
-        if (isNameValid(request.getAuthor())) {
+        if (isNameInvalid(request.getAuthor())) {
             throw new ConstraintViolationException("name should not contain special characters or number", null);
         }
 
+        //Title Rules
         if (hangulMatcher(request.getTitle())) {
             if (request.getTitle().length() > 50) {
                 throw new ConstraintViolationException("titles only contain up to 50 characters in Korean", null);
@@ -127,9 +135,14 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        //Password Rules
         if (request.getPassword().length() > 64) {
             throw new ConstraintViolationException("password only contain up to 100 characters", null);
         }
+        if (!isPasswordValid(request.getPassword())) {
+            throw new ConstraintViolationException("password should only contain latin letters, numbers, and special characters", null);
+        }
+
 
         Post post = postMapper.findById(request.getId());
         if (!post.getPassword().equals(request.getPassword())) {
@@ -152,20 +165,28 @@ public class PostServiceImpl implements PostService {
         postMapper.delete(post.getId(), new Date());
     }
 
+    //Add Views
     @Override
     public void incViews(int id) {
         Post post = find(id);
         postMapper.incViews(id, post.getViews()+1);
     }
 
+    //Utilities Function
     private boolean hangulMatcher(String str) {
         Pattern pattern = Pattern.compile("[\u1100-\u11FF|\u3130-\u318F|\uA960-\uA97F|\uAC00-\uD7AF|\uD7B0-\uD7FF]");
         Matcher matcher = pattern.matcher(str);
         return matcher.find();
     }
 
-    private boolean isNameValid(String str) {
-        Pattern pattern = Pattern.compile("[^a-z ]", Pattern.CASE_INSENSITIVE);
+    private boolean isNameInvalid(String str) {
+        Pattern pattern = Pattern.compile(".*[0-9\\p{Punct}].*");
+        Matcher matcher = pattern.matcher(str);
+        return matcher.find();
+    }
+
+    private boolean isPasswordValid(String str) {
+        Pattern pattern = Pattern.compile("^[a-zA-Z0-9\\p{Punct}]+$");
         Matcher matcher = pattern.matcher(str);
         return matcher.find();
     }
